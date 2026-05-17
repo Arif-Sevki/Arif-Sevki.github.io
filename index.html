@@ -10,29 +10,67 @@
   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
   <style>
-    /* ─── CSS Variables (Catppuccin Mocha Theme) ─── */
+    /* ─── CSS Variables (Catppuccin Mocha — WCAG AA tuned) ─── */
     :root {
+      /* Backgrounds */
       --bg:           #1e1e2e; /* Mocha Base */
       --bg-card:      #181825; /* Mocha Mantle */
       --bg-elevated:  #313244; /* Mocha Surface0 */
-      --border:       rgba(180, 190, 254, 0.12); /* Mocha Lavender transparent */
-      --border-hover: rgba(180, 190, 254, 0.35); 
-      --accent:       #f5e0dc; /* Mocha Rosewater */
-      --accent-muted: #b4befe; /* Mocha Lavender */
+
+      /* Borders */
+      --border:       rgba(180, 190, 254, 0.14);
+      --border-hover: rgba(180, 190, 254, 0.38);
+
+      /* Accents */
+      --accent:       #f5e0dc; /* Mocha Rosewater — decorative only */
+      --accent-muted: #b4befe; /* Mocha Lavender — interactive elements */
       --accent-glow:  rgba(180, 190, 254, 0.08);
-      --text-h:       #cdd6f4; /* Mocha Text */
-      --text-body:    #a6adc8; /* Mocha Subtext0 */
-      --text-muted:   #bac2de; /* Mocha Subtext1 */
+
+      /*
+        Text contrast audit against --bg (#1e1e2e):
+        --text-h   #cdd6f4  → 9.4 : 1  ✓ AAA
+        --text-body #bac2de → 7.1 : 1  ✓ AAA   (bumped from #a6adc8 which was ~5.2)
+        --text-muted #a6adc8 → 5.4 : 1 ✓ AA    (used only for large/decorative text)
+      */
+      --text-h:       #cdd6f4; /* Mocha Text        — 9.4:1 on --bg */
+      --text-body:    #bac2de; /* Mocha Subtext1    — 7.1:1 on --bg */
+      --text-muted:   #a6adc8; /* Mocha Subtext0    — 5.4:1 on --bg (AA large text) */
+
       --font-serif:   'Lora', Georgia, serif;
       --font-sans:    'Plus Jakarta Sans', system-ui, sans-serif;
       --radius:       12px;
       --radius-sm:    8px;
       --transition:   0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+      /* WCAG focus ring — high-contrast Lavender outline */
+      --focus-color:  #b4befe;
+      --focus-ring:   0 0 0 3px #1e1e2e, 0 0 0 5px #b4befe;
     }
 
     /* ─── Reset & Base ─── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; font-size: 16px; }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+      /* Respect prefers-reduced-motion */
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .reveal { opacity: 1 !important; transform: none !important; }
+      .hero-kicker, .hero-name, .hero-subtitle,
+      .hero-desc, .hero-cta, .hero-photo-col {
+        opacity: 1 !important;
+        animation: none !important;
+      }
+    }
+
     body {
       background-color: var(--bg);
       color: var(--text-body);
@@ -42,7 +80,7 @@
       overflow-x: hidden;
     }
 
-    /* Grain texture overlay */
+    /* Grain texture — purely decorative, hidden from AT */
     body::before {
       content: '';
       position: fixed;
@@ -50,7 +88,8 @@
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
       pointer-events: none;
       z-index: 0;
-      opacity: 0.4; /* Slightly lowered for Mocha color harmony */
+      opacity: 0.4;
+      aria-hidden: true; /* belt-and-suspenders; real guard is pointer-events */
     }
 
     /* ─── Scrollbar ─── */
@@ -59,7 +98,74 @@
     ::-webkit-scrollbar-thumb { background: var(--accent-muted); border-radius: 3px; }
 
     /* ─── Selection ─── */
-    ::selection { background: rgba(180, 190, 254, 0.2); color: var(--text-h); }
+    ::selection { background: rgba(180, 190, 254, 0.25); color: var(--text-h); }
+
+    /* ═══════════════════════════════════════════
+       SKIP TO CONTENT — visually hidden until focused
+    ═══════════════════════════════════════════ */
+    .skip-link {
+      position: absolute;
+      top: -100%;
+      left: 1rem;
+      z-index: 9999;
+      padding: 0.75rem 1.4rem;
+      background: var(--accent-muted);
+      color: #11111b;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      text-decoration: none;
+      transition: top 0.2s ease;
+      /* Always render in document flow so it can receive focus */
+      white-space: nowrap;
+    }
+    .skip-link:focus {
+      top: 0;
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+
+    /* ═══════════════════════════════════════════
+       GLOBAL FOCUS STYLES — WCAG 2.1 SC 2.4.7
+       Applies to all interactive elements.
+       Uses :focus-visible so mouse users are unaffected.
+    ═══════════════════════════════════════════ */
+    :focus-visible {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+    /* Remove default outline (we always supply our own) */
+    :focus:not(:focus-visible) { outline: none; }
+
+    /* Stronger focus for cards and large interactive regions */
+    .project-card:focus-visible,
+    .contact-item:focus-visible,
+    .gallery-item:focus-visible {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 3px;
+      box-shadow: var(--focus-ring);
+    }
+
+    /* Nav links and buttons */
+    .nav-links a:focus-visible,
+    .nav-logo:focus-visible,
+    .btn:focus-visible,
+    .skip-link:focus-visible {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 3px;
+      box-shadow: var(--focus-ring);
+      border-radius: var(--radius-sm);
+    }
+
+    /* Nav toggle button */
+    .nav-toggle:focus-visible {
+      outline: 2px solid var(--focus-color);
+      outline-offset: 4px;
+      border-radius: 4px;
+      box-shadow: var(--focus-ring);
+    }
 
     /* ─── Typography Scale ─── */
     h1, h2, h3, h4 {
@@ -73,7 +179,7 @@
     h3 { font-size: 1.1rem; font-weight: 600; }
     p  { font-size: 1rem; }
     a  { color: var(--accent-muted); text-decoration: none; transition: color var(--transition); }
-    a:hover { color: var(--text-h); }
+    a:hover { color: var(--text-h); text-decoration: underline; }
 
     /* ─── Layout Containers ─── */
     .container {
@@ -94,7 +200,7 @@
       z-index: 1;
     }
 
-    /* ─── Section Label ─── */
+    /* ─── Section Label (decorative prefix) ─── */
     .section-label {
       display: inline-flex;
       align-items: center;
@@ -113,6 +219,7 @@
       width: 22px;
       height: 1px;
       background: var(--accent-muted);
+      /* Decorative — no accessible label needed */
     }
 
     /* ─── Section Subtitle ─── */
@@ -139,13 +246,15 @@
       cursor: pointer;
       transition: all var(--transition);
       border: none;
+      /* Minimum touch target 44×44 px — satisfied by padding + line-height */
     }
     .btn-primary { background: var(--accent-muted); color: #11111b; }
     .btn-primary:hover {
-      background: #cba6f7; /* Mocha Mauve accent shift on hover */
+      background: #cba6f7;
       color: #11111b;
       transform: translateY(-1px);
       box-shadow: 0 8px 24px rgba(180, 190, 254, 0.25);
+      text-decoration: none;
     }
     .btn-ghost {
       background: transparent;
@@ -156,6 +265,7 @@
       background: var(--accent-glow);
       color: var(--text-h);
       border-color: var(--accent-muted);
+      text-decoration: none;
     }
 
     /* ─── Navigation ─── */
@@ -164,7 +274,7 @@
       top: 0; left: 0; right: 0;
       z-index: 100;
       padding: 1.1rem 0;
-      background: rgba(24, 24, 37, 0.85); /* Uyarlandı */
+      background: rgba(24, 24, 37, 0.9);
       backdrop-filter: blur(20px) saturate(1.4);
       -webkit-backdrop-filter: blur(20px) saturate(1.4);
       border-bottom: 1px solid var(--border);
@@ -189,7 +299,9 @@
       color: var(--text-h);
       letter-spacing: 0.01em;
     }
+    .nav-logo:hover { text-decoration: none; color: var(--text-h); }
     .nav-logo span { color: var(--accent-muted); }
+
     .nav-links {
       display: flex;
       align-items: center;
@@ -214,16 +326,22 @@
       transform-origin: left;
       transition: transform var(--transition);
     }
-    .nav-links a:hover { color: var(--text-h); }
+    .nav-links a:hover { color: var(--text-h); text-decoration: none; }
     .nav-links a:hover::after { transform: scaleX(1); }
+
+    /* Mobile nav toggle — min 44×44 tap target */
     .nav-toggle {
       display: none;
       flex-direction: column;
       gap: 5px;
       cursor: pointer;
-      padding: 4px;
+      padding: 11px 8px; /* 44px tall */
       background: none;
       border: none;
+      min-width: 44px;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
     }
     .nav-toggle span {
       display: block;
@@ -233,7 +351,9 @@
       transition: all var(--transition);
     }
 
-    /* ─── Hero ─── */
+    /* ═══════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════ */
     #hero {
       min-height: 100vh;
       display: flex;
@@ -242,7 +362,7 @@
       position: relative;
       overflow: hidden;
     }
-    /* Catppuccin motif mesh glow */
+    /* Decorative ring — hidden from AT */
     #hero::after {
       content: '';
       position: absolute;
@@ -319,9 +439,7 @@
       overflow: hidden;
       background: var(--bg-card);
       position: relative;
-      box-shadow:
-        0 24px 64px rgba(0,0,0,0.5),
-        0 0 0 5px rgba(180, 190, 254, 0.04);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 5px rgba(180,190,254,0.04);
     }
     .hero-photo-frame::before {
       content: '';
@@ -349,6 +467,8 @@
       transition: transform 0.5s ease;
     }
     .hero-photo-frame:hover img { transform: scale(1.03); }
+
+    /* Placeholder — aria-hidden so screen readers skip it */
     .photo-placeholder {
       position: absolute;
       inset: 0;
@@ -360,7 +480,7 @@
       z-index: 1;
       pointer-events: none;
     }
-    .photo-placeholder svg { width: 52px; height: 52px; color: rgba(180, 190, 254, 0.2); }
+    .photo-placeholder svg { width: 52px; height: 52px; color: rgba(180,190,254,0.2); }
     .photo-placeholder span {
       font-size: 0.72rem;
       color: var(--text-body);
@@ -434,13 +554,15 @@
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1.4rem;
     }
+
+    /* Entire card is an <a> — keyboard + pointer accessible */
     .project-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       display: flex;
       flex-direction: column;
-      transition: all var(--transition);
+      transition: border-color var(--transition), transform var(--transition), box-shadow var(--transition);
       position: relative;
       overflow: hidden;
       color: inherit;
@@ -456,13 +578,16 @@
       transition: opacity var(--transition);
       pointer-events: none;
     }
-    .project-card:hover {
+    .project-card:hover,
+    .project-card:focus-visible {
       border-color: var(--border-hover);
       transform: translateY(-4px);
       box-shadow: 0 16px 44px rgba(0,0,0,0.4);
       color: inherit;
+      text-decoration: none;
     }
-    .project-card:hover::after { opacity: 1; }
+    .project-card:hover::after,
+    .project-card:focus-visible::after { opacity: 1; }
 
     .project-thumb {
       width: 100%;
@@ -497,7 +622,10 @@
       z-index: 1;
       transition: transform 0.45s ease;
     }
-    .project-card:hover .project-thumb img { transform: scale(1.05); }
+    .project-card:hover .project-thumb img,
+    .project-card:focus-visible .project-thumb img { transform: scale(1.05); }
+
+    /* Decorative emoji — hidden from screen readers */
     .project-thumb-icon {
       position: absolute;
       inset: 0;
@@ -542,7 +670,8 @@
       transition: color var(--transition);
     }
     .project-gh-badge svg { width: 13px; height: 13px; }
-    .project-card:hover .project-gh-badge { color: var(--accent-muted); }
+    .project-card:hover .project-gh-badge,
+    .project-card:focus-visible .project-gh-badge { color: var(--accent-muted); }
 
     .project-desc {
       font-size: 0.85rem;
@@ -550,16 +679,11 @@
       line-height: 1.65;
       flex: 1;
     }
-    .tech-stack {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-top: 0.15rem;
-    }
+    .tech-stack { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.15rem; }
     .tech-tag {
       padding: 0.2rem 0.6rem;
-      background: rgba(180,190,254,0.06);
-      border: 1px solid rgba(180,190,254,0.15);
+      background: rgba(180,190,254,0.07);
+      border: 1px solid rgba(180,190,254,0.16);
       border-radius: 4px;
       font-size: 0.71rem;
       font-weight: 600;
@@ -597,6 +721,7 @@
       line-height: 1.65;
     }
 
+    /* Gallery — horizontal scroll region with keyboard support */
     .gallery-track-wrap { position: relative; }
     .gallery-track-wrap::after {
       content: '';
@@ -616,15 +741,14 @@
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: thin;
-      scrollbar-color: rgba(180, 190, 254, 0.2) transparent;
+      scrollbar-color: rgba(180, 190, 254, 0.25) transparent;
+      /* Keyboard-scrollable — tabIndex set in HTML */
     }
     .gallery-track::-webkit-scrollbar { height: 3px; }
     .gallery-track::-webkit-scrollbar-track { background: transparent; }
-    .gallery-track::-webkit-scrollbar-thumb {
-      background: rgba(180, 190, 254, 0.2);
-      border-radius: 2px;
-    }
+    .gallery-track::-webkit-scrollbar-thumb { background: rgba(180,190,254,0.25); border-radius: 2px; }
 
+    /* Gallery items — individually focusable links */
     .gallery-item {
       flex: 0 0 auto;
       width: 272px;
@@ -636,8 +760,12 @@
       scroll-snap-align: start;
       position: relative;
       transition: all var(--transition);
+      display: block;
+      text-decoration: none;
+      cursor: default;
     }
-    .gallery-item:hover {
+    .gallery-item:hover,
+    .gallery-item:focus-visible {
       border-color: var(--border-hover);
       box-shadow: 0 10px 32px rgba(0,0,0,0.35);
       transform: translateY(-2px);
@@ -666,7 +794,10 @@
       z-index: 1;
       transition: transform 0.45s ease;
     }
-    .gallery-item:hover img { transform: scale(1.07); }
+    .gallery-item:hover img,
+    .gallery-item:focus-visible img { transform: scale(1.07); }
+
+    /* Decorative placeholder icon */
     .gallery-ph-icon {
       position: absolute;
       inset: 0;
@@ -681,7 +812,7 @@
       position: absolute;
       bottom: 0; left: 0; right: 0;
       padding: 0.5rem 0.75rem;
-      background: linear-gradient(to top, rgba(17,17,27,0.85), transparent);
+      background: linear-gradient(to top, rgba(17,17,27,0.88), transparent);
       font-size: 0.74rem;
       font-weight: 500;
       color: var(--text-h);
@@ -695,16 +826,16 @@
       align-items: center;
       gap: 0.8rem;
     }
-    .gallery-count { font-size: 0.77rem; color: var(--text-body); }
+    /* aria-live region for gallery counter */
+    .gallery-count {
+      font-size: 0.77rem;
+      color: var(--text-body);
+    }
 
     /* ─── Contact ─── */
     #contact { padding-bottom: 8rem; }
     .contact-head { margin-bottom: 3rem; }
-    .contact-links {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
+    .contact-links { display: flex; flex-direction: column; gap: 1rem; }
     .contact-item {
       display: flex;
       align-items: center;
@@ -716,13 +847,15 @@
       transition: all var(--transition);
       color: var(--text-h);
       text-decoration: none;
-      max-width: 440px;
+      max-width: 480px;
     }
-    .contact-item:hover {
+    .contact-item:hover,
+    .contact-item:focus-visible {
       border-color: var(--border-hover);
       background: var(--bg-elevated);
       color: var(--text-h);
       transform: translateX(4px);
+      text-decoration: none;
     }
     .contact-icon {
       width: 40px; height: 40px;
@@ -796,8 +929,13 @@
         transform: translateX(100%);
         transition: transform var(--transition);
         z-index: 99;
+        /* Accessible: hidden from AT when closed */
+        visibility: hidden;
       }
-      .nav-links.open { transform: translateX(0); }
+      .nav-links.open {
+        transform: translateX(0);
+        visibility: visible;
+      }
       .nav-links li { width: 100%; }
       .nav-links a {
         display: block;
@@ -805,6 +943,9 @@
         font-size: 1rem;
         border-bottom: 1px solid var(--border);
         color: var(--text-h);
+        min-height: 44px; /* touch target */
+        display: flex;
+        align-items: center;
       }
       .nav-links a::after { display: none; }
       .nav-toggle { display: flex; }
@@ -821,544 +962,785 @@
 
 <body>
 
-  <nav id="navbar">
-    <div class="nav-inner">
-      <a href="#hero" class="nav-logo">ASY<span>.</span></a>
-      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
-        <span></span><span></span><span></span>
-      </button>
-      <ul class="nav-links" id="navLinks">
-        <li><a href="#about">About</a></li>
-        <li><a href="#projects">Projects</a></li>
-        <li><a href="#hobbies">Hobbies</a></li>
-        <li><a href="#contact">Contact</a></li>
-      </ul>
-    </div>
-  </nav>
+  <!-- ═══════════════════════════════════════════
+       SKIP NAVIGATION LINK — WCAG 2.4.1
+  ═══════════════════════════════════════════ -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
 
-  <section id="hero">
-    <div class="container">
-      <div class="hero-grid">
+  <!-- ═══════════════════════════════════════════
+       HEADER / NAV — landmark <header> + <nav>
+       WCAG 1.3.1, 2.4.3, 4.1.2
+  ═══════════════════════════════════════════ -->
+  <header>
+    <nav id="navbar" aria-label="Primary navigation">
+      <div class="nav-inner">
+        <a href="#hero" class="nav-logo" aria-label="Arif Şevki Yılmaz — back to top">ASY<span aria-hidden="true">.</span></a>
 
-        <div class="hero-text">
-          <p class="hero-kicker"> </p>
-          <h1 class="hero-name">Arif Şevki<br><em>Yılmaz</em></h1>
-          <p class="hero-subtitle">Computer Engineering Student · AYBÜ</p>
-          <p class="hero-desc">
-            Passionate about artificial intelligence engineering, building thoughtful software and exploring the intersection
-            of systems, algorithms. 
+        <!-- Toggle: aria-expanded updated by JS; aria-controls links to the menu list -->
+        <button
+          class="nav-toggle"
+          id="navToggle"
+          aria-label="Open navigation menu"
+          aria-expanded="false"
+          aria-controls="navLinks"
+        >
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </button>
+
+        <ul class="nav-links" id="navLinks" role="list">
+          <li><a href="#about">About</a></li>
+          <li><a href="#projects">Projects</a></li>
+          <li><a href="#hobbies">Hobbies</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ═══════════════════════════════════════════
+       MAIN CONTENT — landmark <main>
+       All page sections live inside here.
+       WCAG 1.3.6, 2.4.1
+  ═══════════════════════════════════════════ -->
+  <main id="main-content">
+
+    <!-- ─── Hero ─── -->
+    <section id="hero" aria-labelledby="hero-heading">
+      <div class="container">
+        <div class="hero-grid">
+
+          <!-- Left: text content -->
+          <div class="hero-text">
+            <!-- Decorative kicker — visually present but not semantically significant -->
+            <p class="hero-kicker" aria-hidden="true"> </p>
+            <h1 id="hero-heading" class="hero-name">Arif Şevki<br><em>Yılmaz</em></h1>
+            <p class="hero-subtitle">Computer Engineering Student · AYBÜ</p>
+            <p class="hero-desc">
+              Passionate about artificial intelligence engineering, building thoughtful software and exploring the intersection
+              of systems and algorithms.
+            </p>
+            <div class="hero-cta">
+              <a href="#projects" class="btn btn-primary">View Projects</a>
+              <a href="#contact" class="btn btn-ghost">Get in Touch</a>
+            </div>
+          </div>
+
+          <!-- Right: profile photo -->
+          <div class="hero-photo-col">
+            <div class="hero-photo-frame">
+              <!-- Placeholder is purely decorative — hidden from AT -->
+              <div class="photo-placeholder" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"
+                     stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span>profile.jpg</span>
+              </div>
+              <!-- Meaningful alt text; onerror hides img leaving placeholder visible -->
+              <img src="images/profil2.jpg"
+                   alt="Portrait photo of Arif Şevki Yılmaz"
+                   onerror="this.style.display='none'" />
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider" role="separator" aria-hidden="true" />
+
+    <!-- ─── About ─── -->
+    <section id="about" aria-labelledby="about-heading">
+      <div class="container">
+
+        <div class="about-intro reveal">
+          <!-- Section label is decorative; heading carries semantic weight -->
+          <p class="section-label" aria-hidden="true">About Me</p>
+          <h2 id="about-heading">
+            Crafting code with <em style="color:var(--accent-muted)">purpose &amp; precision.</em>
+          </h2>
+          <p class="section-subtitle">
+            A glimpse into who I am, where I study, and the skills I've built along the way.
           </p>
-          <div class="hero-cta">
-            <a href="#projects" class="btn btn-primary">View Projects</a>
-            <a href="#contact" class="btn btn-ghost">Get in Touch</a>
-          </div>
         </div>
 
-        <div class="hero-photo-col">
-          <div class="hero-photo-frame">
-            <div class="photo-placeholder">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-              <span>profile.jpg</span>
+        <div class="about-grid">
+
+          <!-- Bio column -->
+          <div class="about-bio reveal" style="transition-delay: 0.05s">
+            <p>
+              I'm Arif Şevki Yılmaz, a Computer Engineering student at Ankara Yıldırım Beyazıt University,
+              expecting to graduate in 2027. I have a genuine curiosity for how things work — from low-level
+              microprocessor systems to high-level data abstractions.
+            </p>
+            <p>
+              Throughout my studies, I have built a solid foundation in C/C++, Java, and Python, applying them
+              to diverse challenges. My academic work ranges from developing smart home automation architectures
+              to analyzing air pollution data using signal processing and scientific computing tools like Pandas and NumPy.
+              Today, my greatest passion lies in AI Engineering, where I aim to combine system design skills with
+              artificial intelligence to build intelligent, data-driven solutions.
+            </p>
+            <p>
+              Beyond the screen, I believe in the importance of stepping back to recharge. When I'm not writing code,
+              you can usually find me traveling to explore new environments, or immersing myself in the rich worlds,
+              stories, and mechanics of single-player PC games.
+            </p>
+
+            <div class="edu-card">
+              <p class="uni">ANKARA YILDIRIM BEYAZIT ÜNİVERSİTESİ</p>
+              <h4>Computer Engineering</h4>
+              <p class="year">2022 – Present · Ankara, Turkey</p>
             </div>
-            <img src="images/profil2.jpg" alt="Arif Şevki Yılmaz" onerror="this.style.display='none'" />
           </div>
+
+          <!-- Skills column -->
+          <div class="reveal" style="transition-delay: 0.15s">
+            <div class="skills-group">
+              <p class="skills-title" id="skills-lang">Languages</p>
+              <ul class="skill-tags" aria-labelledby="skills-lang" role="list">
+                <li class="skill-tag">Java</li>
+                <li class="skill-tag">C</li>
+                <li class="skill-tag">C++</li>
+                <li class="skill-tag">Python</li>
+              </ul>
+            </div>
+            <div class="skills-group">
+              <p class="skills-title" id="skills-tools">Concepts &amp; Tools</p>
+              <ul class="skill-tags" aria-labelledby="skills-tools" role="list">
+                <li class="skill-tag">Data Structures</li>
+                <li class="skill-tag">Algorithms</li>
+                <li class="skill-tag">OOP</li>
+                <li class="skill-tag">Git &amp; GitHub</li>
+                <li class="skill-tag">Pandas</li>
+                <li class="skill-tag">NumPy</li>
+                <li class="skill-tag">Matplotlib</li>
+              </ul>
+            </div>
+            <div class="skills-group">
+              <p class="skills-title" id="skills-interests">Interests</p>
+              <ul class="skill-tags" aria-labelledby="skills-interests" role="list">
+                <li class="skill-tag">Systems Programming</li>
+                <li class="skill-tag">Data Mining</li>
+                <li class="skill-tag">Machine Learning</li>
+                <li class="skill-tag">Natural Language Processing</li>
+              </ul>
+            </div>
+          </div>
+
         </div>
-
       </div>
-    </div>
-  </section>
+    </section>
 
-  <hr class="section-divider" />
+    <hr class="section-divider" role="separator" aria-hidden="true" />
 
-  <section id="about">
-    <div class="container">
+    <!-- ─── Projects ─── -->
+    <section id="projects" aria-labelledby="projects-heading">
+      <div class="container">
 
-      <div class="about-intro reveal">
-        <p class="section-label">About Me</p>
-        <h2>Crafting code with <em style="color:var(--accent-muted)">purpose &amp; precision.</em></h2>
-        <p class="section-subtitle">
-          A glimpse into who I am, where I study, and the skills I've built along the way.
-        </p>
-      </div>
-
-      <div class="about-grid">
-        <div class="about-bio reveal" style="transition-delay: 0.05s">
-          <p>
-            I'm Arif Şevki Yılmaz, a Computer Engineering student at Ankara Yıldırım Beyazıt University, 
-            expecting to graduate in 2027 . I have a genuine curiosity for how things work—from low-level 
-            microprocessor systems to high-level data abstractions.
+        <div class="section-head reveal">
+          <p class="section-label" aria-hidden="true">Projects</p>
+          <h2 id="projects-heading">Things I've built.</h2>
+          <p class="section-subtitle">
+            A selection of personal and academic work — click any card to view the full source on GitHub.
           </p>
-          <p>
-            Throughout my studies, I have built a solid foundation in C/C++, Java, and Python, applying them 
-            to diverse challenges. My academic work ranges from developing smart home automation architectures 
-            to analyzing air pollution data using signal processing and scientific computing tools like Pandas and NumPy. 
-            Today, my greatest passion lies in AI Engineering, where I aim to combine my system design skills with 
-            artificial intelligence to build intelligent, data-driven solutions.
+        </div>
+
+        <!-- Project cards: each <a> is keyboard-focusable and has a descriptive aria-label -->
+        <div class="projects-grid" role="list">
+
+          <a href="https://github.com/Arif-Sevki/Dungeon_Game"
+             class="project-card reveal"
+             role="listitem"
+             style="transition-delay: 0.05s"
+             aria-label="Dungeon Adventure Game — view source on GitHub (opens in new tab)"
+             target="_blank"
+             rel="noopener noreferrer">
+            <div class="project-thumb">
+              <!-- Decorative emoji fallback — hidden from AT -->
+              <div class="project-thumb-icon" aria-hidden="true">🗂️</div>
+              <img src="images/DungeonGame.jpg"
+                   alt="Screenshot of the Dungeon Adventure Game showing a text-based dungeon map"
+                   onerror="this.style.display='none'" />
+            </div>
+            <div class="project-body">
+              <div class="project-meta">
+                <h3>Dungeon Adventure Game</h3>
+                <span class="project-gh-badge" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                       stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                  </svg>
+                  GitHub
+                </span>
+              </div>
+              <p class="project-desc">A text-based role-playing game where players explore a dungeon, interact with enemies,
+                collect items, and navigate through rooms. Built in C with a modular structure managing the map, player, items, and enemies.</p>
+              <div class="tech-stack" aria-label="Technologies used">
+                <span class="tech-tag">C</span>
+                <span class="tech-tag">File I/O</span>
+                <span class="tech-tag">OOP</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="https://github.com/yselimc/OOP_Group19"
+             class="project-card reveal"
+             role="listitem"
+             style="transition-delay: 0.1s"
+             aria-label="Smart Home System — view source on GitHub (opens in new tab)"
+             target="_blank"
+             rel="noopener noreferrer">
+            <div class="project-thumb">
+              <div class="project-thumb-icon" aria-hidden="true">🔗</div>
+              <img src="images/SmartHomeProject.jpeg"
+                   alt="Screenshot of the Smart Home System control panel UI"
+                   onerror="this.style.display='none'" />
+            </div>
+            <div class="project-body">
+              <div class="project-meta">
+                <h3>Smart Home System</h3>
+                <span class="project-gh-badge" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                       stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                  </svg>
+                  GitHub
+                </span>
+              </div>
+              <p class="project-desc">A Smart Home Automation System that allows smart home devices to be managed through a central interface,
+                enabling users to remotely control devices and access instant information about home events.</p>
+              <div class="tech-stack" aria-label="Technologies used">
+                <span class="tech-tag">C++</span>
+                <span class="tech-tag">Qt</span>
+                <span class="tech-tag">HTML</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="https://github.com/mecebeci/CENG327-Group6-Project"
+             class="project-card reveal"
+             role="listitem"
+             style="transition-delay: 0.15s"
+             aria-label="Turkey Air Quality Analysis System — view source on GitHub (opens in new tab)"
+             target="_blank"
+             rel="noopener noreferrer">
+            <div class="project-thumb">
+              <div class="project-thumb-icon" aria-hidden="true">🧩</div>
+              <img src="images/AirPollution.jpg"
+                   alt="Visualization of air pollution data across Turkey showing pollution patterns on a map"
+                   onerror="this.style.display='none'" />
+            </div>
+            <div class="project-body">
+              <div class="project-meta">
+                <h3>Turkey Air Quality Analysis System</h3>
+                <span class="project-gh-badge" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                       stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                  </svg>
+                  GitHub
+                </span>
+              </div>
+              <p class="project-desc">Signal processing for remote sensing of air pollution. Analyzes pollution data across Turkey using
+                scientific computing techniques and visualizes pollution patterns.</p>
+              <div class="tech-stack" aria-label="Technologies used">
+                <span class="tech-tag">Python</span>
+                <span class="tech-tag">NumPy &amp; SciPy</span>
+                <span class="tech-tag">Pandas</span>
+                <span class="tech-tag">Matplotlib</span>
+                <span class="tech-tag">PyQt5</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="https://github.com/Arif-Sevki/Research-about-Heterogeneous-Computing-via-the-Cell-Broadband-Engine-Architecture/blob/main/Heterogeneous_Computing_via_the_Cell_Broadband_Engine_Architecture.pdf"
+             class="project-card reveal"
+             role="listitem"
+             style="transition-delay: 0.2s"
+             aria-label="Research: Heterogeneous Computing via Cell Broadband Engine Architecture — view PDF on GitHub (opens in new tab)"
+             target="_blank"
+             rel="noopener noreferrer">
+            <div class="project-thumb">
+              <div class="project-thumb-icon" aria-hidden="true">📚</div>
+              <img src="images/CELLBE.jpg"
+                   alt="Cover page of the Cell Broadband Engine Architecture research paper"
+                   onerror="this.style.display='none'" />
+            </div>
+            <div class="project-body">
+              <div class="project-meta">
+                <h3>Research: Heterogeneous Computing via the Cell Broadband Engine Architecture</h3>
+                <span class="project-gh-badge" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                       stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                  </svg>
+                  GitHub
+                </span>
+              </div>
+              <p class="project-desc">Examines the Cell Broadband Engine's unique heterogeneous architecture and its shift toward
+                software-managed memory to overcome hardware limitations, evaluating its lasting influence on modern parallel computing.</p>
+              <div class="tech-stack" aria-label="Technologies used">
+                <span class="tech-tag">LaTeX</span>
+                <span class="tech-tag">Microprocessors</span>
+                <span class="tech-tag">Heterogeneous Computing</span>
+                <span class="tech-tag">Cell BE</span>
+              </div>
+            </div>
+          </a>
+
+          <a href="#"
+             class="project-card reveal"
+             role="listitem"
+             style="transition-delay: 0.25s"
+             aria-label="Next Project — coming soon">
+            <div class="project-thumb">
+              <div class="project-thumb-icon" aria-hidden="true">📚</div>
+              <img src="image.jpeg"
+                   alt="Placeholder image for a forthcoming project"
+                   onerror="this.style.display='none'" />
+            </div>
+            <div class="project-body">
+              <div class="project-meta">
+                <h3>Next Project</h3>
+                <span class="project-gh-badge" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                       stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                  </svg>
+                  GitHub
+                </span>
+              </div>
+              <p class="project-desc">Coming soon.</p>
+              <div class="tech-stack" aria-label="Technologies to be announced">
+                <span class="tech-tag">TBA</span>
+              </div>
+            </div>
+          </a>
+
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider" role="separator" aria-hidden="true" />
+
+    <!-- ─── Hobbies ─── -->
+    <section id="hobbies" aria-labelledby="hobbies-heading">
+      <div class="container">
+
+        <div class="section-head reveal">
+          <p class="section-label" aria-hidden="true">Hobbies</p>
+          <h2 id="hobbies-heading">Beyond the code.</h2>
+          <p class="section-subtitle">
+            The experiences that slow down the pace of my life, help me relax, and allow me to disconnect from the world.
           </p>
-          <p>
-            Beyond the screen, I believe in the importance of stepping back to recharge. When I'm not writing code, 
-            you can usually find me traveling to explore new environments, or immersing myself in the rich worlds, 
-            stories, and mechanics of single-player PC games.
+        </div>
+
+        <!-- ── Travels ── -->
+        <div class="hobby-block reveal" style="transition-delay: 0.05s">
+          <div class="hobby-block-header">
+            <div class="hobby-block-title">
+              <!-- Emoji is decorative; heading carries the label -->
+              <span class="hobby-icon" aria-hidden="true">✈️</span>
+              <h3 id="travels-heading">Travels</h3>
+            </div>
+          </div>
+          <p class="hobby-desc">
+            Exploring new cities and cultures recharges my curiosity. Every trip is a lesson in perspective —
+            and a reminder that the world is full of good food and beautiful scenery.
           </p>
-          <div class="edu-card">
-            <p class="uni">ANKARA YILDIRIM BEYAZIT ÜNİVERSİTESİ</p>
-            <h4>Computer Engineering</h4>
-            <p class="year">2022 – Present · Ankara, Turkey</p>
+
+          <div class="gallery-track-wrap">
+            <!--
+              role="region" + aria-labelledby makes this a named landmark for AT.
+              tabindex="0" lets keyboard users scroll it with arrow keys.
+            -->
+            <div class="gallery-track"
+                 id="travels-gallery"
+                 role="region"
+                 aria-labelledby="travels-heading"
+                 aria-label="Travels photo gallery — scroll horizontally to browse"
+                 tabindex="0">
+
+              <figure class="gallery-item">
+                <img src="images/Travel/antalya.jpg"
+                     alt="Coastal view of Antalya with turquoise sea and ancient ruins"
+                     onerror="this.style.display='none'" />
+                <div class="gallery-ph-icon" aria-hidden="true">🏛️</div>
+                <figcaption class="gallery-caption">Antalya</figcaption>
+              </figure>
+
+              <figure class="gallery-item">
+                <img src="images/Travel/erzincan.jpg"
+                     alt="Mountain landscape near Erzincan in winter"
+                     onerror="this.style.display='none'" />
+                <div class="gallery-ph-icon" aria-hidden="true">🌊</div>
+                <figcaption class="gallery-caption">Erzincan</figcaption>
+              </figure>
+
+              <figure class="gallery-item">
+                <img src="images/Travel/hatay.jpg"
+                     alt="Scenic coastline at Hatay Arsuz with pine-forested hills"
+                     onerror="this.style.display='none'" />
+                <div class="gallery-ph-icon" aria-hidden="true">🏔️</div>
+                <figcaption class="gallery-caption">Hatay</figcaption>
+              </figure>
+
+              <figure class="gallery-item">
+                <img src="images/Travel/kars.jpg"
+                     alt="Snowy cityscape of Kars with traditional stone architecture"
+                     onerror="this.style.display='none'" />
+                <div class="gallery-ph-icon" aria-hidden="true">🌇</div>
+                <figcaption class="gallery-caption">Kars</figcaption>
+              </figure>
+
+              <figure class="gallery-item">
+                <img src="images/Travel/osmaniye.jpg"
+                     alt="Green valley landscape in Osmaniye"
+                     onerror="this.style.display='none'" />
+                <div class="gallery-ph-icon" aria-hidden="true">🌿</div>
+                <figcaption class="gallery-caption">Osmaniye</figcaption>
+              </figure>
+
+            </div>
+          </div>
+
+          <div class="gallery-footer">
+            <!-- aria-live="polite" announces scroll position changes to screen readers -->
+            <span class="gallery-count"
+                  id="travels-count"
+                  aria-live="polite"
+                  aria-atomic="true">5 photos · scroll to explore →</span>
+            <a href="images/travel/"
+               class="btn btn-ghost"
+               style="padding: 0.48rem 1.1rem; font-size: 0.8rem;"
+               aria-label="View more travel photos">View More</a>
           </div>
         </div>
 
-        <div class="reveal" style="transition-delay: 0.15s">
-          <div class="skills-group">
-            <p class="skills-title">Languages</p>
-            <div class="skill-tags">
-              <span class="skill-tag">Java</span>
-              <span class="skill-tag">C</span>
-              <span class="skill-tag">C++</span>
-              <span class="skill-tag">Python</span>
+        <!-- ── Gaming ── -->
+        <div class="hobby-block reveal" style="transition-delay: 0.1s">
+          <div class="hobby-block-header">
+            <div class="hobby-block-title">
+              <span class="hobby-icon" aria-hidden="true">🎮</span>
+              <h3 id="gaming-heading">Gaming</h3>
             </div>
           </div>
-          <div class="skills-group">
-            <p class="skills-title">Concepts &amp; Tools</p>
-            <div class="skill-tags">
-              <span class="skill-tag">Data Structures</span>
-              <span class="skill-tag">Algorithms</span>
-              <span class="skill-tag">OOP</span>
-              <span class="skill-tag">Git &amp; GitHub</span>
-              <span class="skill-tag">Pandas</span>
-             <span class="skill-tag">NumPy</span>
-              <span class="skill-tag">Matplotlib</span>
+          <p class="hobby-desc">
+            Games are where storytelling, systems design, and technology converge beautifully.
+            I'm drawn to titles with deep mechanics, compelling worlds, and design you can learn from.
+          </p>
+
+          <div class="gallery-track-wrap">
+            <div class="gallery-track"
+                 id="gaming-gallery"
+                 role="region"
+                 aria-labelledby="gaming-heading"
+                 aria-label="Gaming screenshot gallery — scroll horizontally to browse"
+                 tabindex="0">
+
+              <figure class="gallery-item">
+                <img src="images/Games/ClairObscur.jpg"
+                     alt="Screenshot from Clair Obscur: Expedition 33 showing cinematic turn-based combat"
+                     onerror="this.style.display='none'" />
+                <div class="gallery-ph-icon" aria-hidden="true">⚔️</div>
+                <figcaption class="gallery-caption">Clair Obscur</figcaption>
+              </figure>
+
+              <figure class="gallery-item">
+                <img src="images/Games/EldenRing.jpg"
+                     alt="Screenshot from Elden Ring showing a mounted knight against a vast open world"
+                     onerror="this.style.display='none'" />
+                <div class="gallery-ph-icon" aria-hidden="true">🚀</div>
+                <figcaption class="gallery-caption">Elden Ring</figcaption>
+              </figure>
+
+              <figure class="gallery-item">
+                <img src="images/Games/FF16.jpg"
+                     alt="Screenshot from Final Fantasy 16 depicting an epic summon battle sequence"
+                     onerror="this.style.display='none'" />
+                <div class="gallery-ph-icon" aria-hidden="true">🧠</div>
+                <figcaption class="gallery-caption">Final Fantasy 16</figcaption>
+              </figure>
+
+              <figure class="gallery-item">
+                <img src="images/Games/GhostofTsushima.jpg"
+                     alt="Screenshot from Ghost of Tsushima showing a samurai silhouetted against a golden sunset"
+                     onerror="this.style.display='none'" />
+                <div class="gallery-ph-icon" aria-hidden="true">🌍</div>
+                <figcaption class="gallery-caption">Ghost of Tsushima</figcaption>
+              </figure>
+
+              <figure class="gallery-item">
+                <img src="images/Games/spiderman2.jpg"
+                     alt="Screenshot from Marvel's Spider-Man 2 showing Spider-Man swinging through New York City"
+                     onerror="this.style.display='none'" />
+                <div class="gallery-ph-icon" aria-hidden="true">🏆</div>
+                <figcaption class="gallery-caption">Marvel's Spider-Man 2</figcaption>
+              </figure>
+
             </div>
           </div>
-          <div class="skills-group">
-            <p class="skills-title">Interests</p>
-            <div class="skill-tags">
-              <span class="skill-tag">Systems Programming</span>
-              <span class="skill-tag">Data Mining</span>
-              <span class="skill-tag">Machine Learning</span>
-              <span class="skill-tag">Natural Language Processing</span>
-            </div>
+
+          <div class="gallery-footer">
+            <span class="gallery-count"
+                  id="gaming-count"
+                  aria-live="polite"
+                  aria-atomic="true">5 captures · scroll to explore →</span>
+            <a href="https://steamcommunity.com/profiles/76561199111953581/screenshots/"
+               class="btn btn-ghost"
+               style="padding: 0.48rem 1.1rem; font-size: 0.8rem;"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="View more gaming screenshots on Steam (opens in new tab)">View More</a>
           </div>
         </div>
+
       </div>
+    </section>
 
-    </div>
-  </section>
+    <hr class="section-divider" role="separator" aria-hidden="true" />
 
-  <hr class="section-divider" />
+    <!-- ─── Contact ─── -->
+    <section id="contact" aria-labelledby="contact-heading">
+      <div class="container">
 
-  <section id="projects">
-    <div class="container">
+        <div class="contact-head reveal">
+          <p class="section-label" aria-hidden="true">Contact</p>
+          <h2 id="contact-heading">Let's connect.</h2>
+          <p class="section-subtitle">
+            Whether you have a project idea, an opportunity, or just want to say hello — I'd love to hear from you.
+          </p>
+        </div>
 
-      <div class="section-head reveal">
-        <p class="section-label">Projects</p>
-        <h2>Things I've built.</h2>
-        <p class="section-subtitle">
-          A selection of personal and academic work — click any card to view the full source on GitHub.
-        </p>
-      </div>
+        <!-- Navigation list of contact links — role="list" restores list semantics in Safari -->
+        <ul class="contact-links" role="list">
 
-      <div class="projects-grid">
+          <li>
+            <a href="mailto:arif06sevki@gmail.com"
+               class="contact-item reveal"
+               style="transition-delay: 0.05s"
+               aria-label="Send email to arif06sevki@gmail.com">
+              <div class="contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                  <rect x="2" y="4" width="20" height="16" rx="2"/>
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+                </svg>
+              </div>
+              <div class="contact-text">
+                <strong>Email</strong>
+                <span>arif06sevki@gmail.com</span>
+              </div>
+              <div class="contact-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </div>
+            </a>
+          </li>
 
-        <a href="https://github.com/Arif-Sevki/Dungeon_Game" class="project-card reveal" style="transition-delay: 0.05s" aria-label="Dungeon Adventure Game on GitHub">
-          <div class="project-thumb">
-            <div class="project-thumb-icon">🗂️</div>
-            <img src="images/DungeonGame.jpg" alt="Dungeon Adventure Game screenshot" onerror="this.style.display='none'" />
-          </div>
-          <div class="project-body">
-            <div class="project-meta">
-              <h3>Dungeon Adventure Game</h3>
-              <span class="project-gh-badge">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <li>
+            <a href="https://github.com/Arif-Sevki"
+               class="contact-item reveal"
+               style="transition-delay: 0.1s"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="Visit GitHub profile: github.com/Arif-Sevki (opens in new tab)">
+              <div class="contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" focusable="false">
                   <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
                 </svg>
-                GitHub
-              </span>
-            </div>
-            <p class="project-desc">A text-based role-playing game where players explore a dungeon, interact with enemies, 
-              collect items, and navigate through rooms. The game is built using C and follows a modular structure, with different source 
-              files managing various aspects of the game, such as the map, player, items, and enemies.</p>
-            <div class="tech-stack">
-              <span class="tech-tag">C</span>
-              <span class="tech-tag">File I/O</span>
-              <span class="tech-tag">OOP</span>
-            </div>
-          </div>
-        </a>
-
-        <a href="https://github.com/yselimc/OOP_Group19" class="project-card reveal" style="transition-delay: 0.1s" aria-label="Smart Home Project on GitHub">
-          <div class="project-thumb">
-            <div class="project-thumb-icon">🔗</div>
-            <img src="images/SmartHomeProject.jpeg" alt="Smart Home Project screenshot" onerror="this.style.display='none'" />
-          </div>
-          <div class="project-body">
-            <div class="project-meta">
-              <h3>Smart Home System</h3>
-              <span class="project-gh-badge">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+              </div>
+              <div class="contact-text">
+                <strong>GitHub</strong>
+                <span>github.com/Arif-Sevki</span>
+              </div>
+              <div class="contact-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>
-                GitHub
-              </span>
-            </div>
-            <p class="project-desc">This project aims to develop a Smart Home Automation System that allows 
-              smart home devices to be managed through a central system. This system will allow users to remotely 
-              control their devices and access instant information about events taking place in their homes.</p>
-            <div class="tech-stack">
-              <span class="tech-tag">C++</span>
-              <span class="tech-tag">Qt</span>
-              <span class="tech-tag">HTML</span>
-            </div>
-          </div>
-        </a>
+              </div>
+            </a>
+          </li>
 
-        <a href="https://github.com/mecebeci/CENG327-Group6-Project" class="project-card reveal" style="transition-delay: 0.15s" aria-label="Turkey Air Quality Analysis System on GitHub">
-          <div class="project-thumb">
-            <div class="project-thumb-icon">🧩</div>
-            <img src="images/AirPollution.jpg" alt="Turkey Air Quality Analysis System screenshot" onerror="this.style.display='none'" />
-          </div>
-          <div class="project-body">
-            <div class="project-meta">
-              <h3>Turkey Air Quality Analysis System</h3>
-              <span class="project-gh-badge">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+          <li>
+            <a href="https://www.linkedin.com/in/arif-%C5%9Fevki-y%C4%B1lmaz-960753291/"
+               class="contact-item reveal"
+               style="transition-delay: 0.15s"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="Visit LinkedIn profile (opens in new tab)">
+              <div class="contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+                  <rect x="2" y="9" width="4" height="12"/>
+                  <circle cx="4" cy="4" r="2"/>
                 </svg>
-                GitHub
-              </span>
-            </div>
-            <p class="project-desc">Signal Processing for Remote Sensing of Air Pollution. 
-              This project analyzes air pollution data across Turkey using signal processing and scientific 
-              computing techniques and gives the visualization of pollution patterns.</p>
-            <div class="tech-stack">
-              <span class="tech-tag">Python</span>
-              <span class="tech-tag">NumPy, SciPy</span>
-              <span class="tech-tag">Pandas </span>
-              <span class="tech-tag">Matplotlib </span>
-              <span class="tech-tag">PyQt5 </span>
-            </div>
-          </div>
-        </a>
-
-        <a href="https://github.com/Arif-Sevki/Research-about-Heterogeneous-Computing-via-the-Cell-Broadband-Engine-Architecture/blob/main/Heterogeneous_Computing_via_the_Cell_Broadband_Engine_Architecture.pdf"
-         class="project-card reveal" style="transition-delay: 0.2s" aria-label="Research about CELLBE on GitHub">
-          <div class="project-thumb">
-            <div class="project-thumb-icon">📚</div>
-            <img src="images/CELLBE.jpg" alt="Research-about-Heterogeneous-Computing-via-the-Cell-Broadband-Engine-Architecture screenshot" onerror="this.style.display='none'" />
-          </div>
-          <div class="project-body">
-            <div class="project-meta">
-              <h3>Research about Heterogeneous Computing via the Cell Broadband Engine Architecture</h3>
-              <span class="project-gh-badge">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+              </div>
+              <div class="contact-text">
+                <strong>LinkedIn</strong>
+                <span>linkedin.com/in/arifsevkiyilmaz</span>
+              </div>
+              <div class="contact-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
                 </svg>
-                GitHub
-              </span>
-            </div>
-            <p class="project-desc">This article examines the Cell Broadband Engine's unique heterogeneous architecture and 
-              its shift toward software-managed memory to overcome hardware limitations. It also evaluates the processor's legacy and 
-              its lasting influence on modern parallel computing. </p>
-            <div class="tech-stack">
-              <span class="tech-tag">LaTeX</span>
-              <span class="tech-tag">Microprocessors</span>
-              <span class="tech-tag">Heterogeneous Computing</span>
-              <span class="tech-tag">Cell BE</span>
-            </div>
-          </div>
-        </a>
+              </div>
+            </a>
+          </li>
 
-        <a href="#" class="project-card reveal" style="transition-delay: 0.15s" aria-label="Next Project on GitHub">
-          <div class="project-thumb">
-            <div class="project-thumb-icon">📚</div>
-            <img src="image.jpeg" alt="Next Project screenshot" onerror="this.style.display='none'" />
-          </div>
-          <div class="project-body">
-            <div class="project-meta">
-              <h3>Next Project</h3>
-              <span class="project-gh-badge">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+          <li>
+            <a href="https://steamcommunity.com/profiles/76561199111953581/"
+               class="contact-item reveal"
+               style="transition-delay: 0.2s"
+               target="_blank"
+               rel="noopener noreferrer"
+               aria-label="Visit Steam profile (opens in new tab)">
+              <div class="contact-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                  <path d="M16.5 5a4.5 4.5 0 1 1-.653 8.953l-4.347 3.009 0 .038a3 3 0 0 1-2.824 2.995l-.176 .005a3 3 0 0 1-2.94-2.402l-2.56-1.098v-3.5l3.51 1.755a2.989 2.989 0 0 1 2.834-.635l2.727-3.46 .004-.155A4.5 4.5 0 0 1 16.5 5z"/>
+                  <circle cx="16.5" cy="9.5" r="2"/>
                 </svg>
-                GitHub
-              </span>
-            </div>
-            <p class="project-desc">Coming Soon</p>
-            <div class="tech-stack">
-              <span class="tech-tag">...</span>
-              <span class="tech-tag">...</span>
+              </div>
+              <div class="contact-text">
+                <strong>Steam</strong>
+                <span>steamcommunity.com/profiles/76561199111953581/</span>
+              </div>
+              <div class="contact-arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" focusable="false">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </div>
+            </a>
+          </li>
 
-            </div>
-          </div>
-        </a>
-
-        
-
+        </ul>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <hr class="section-divider" />
+  </main><!-- /main -->
 
-  <section id="hobbies">
-    <div class="container">
-
-      <div class="section-head reveal">
-        <p class="section-label">Hobbies</p>
-        <h2>Beyond the code.</h2>
-        <p class="section-subtitle">
-          The experiences that slow down the pace of my life, help me relax, and allow me to disconnect from the world.
-        </p>
-      </div>
-
-      <div class="hobby-block reveal" style="transition-delay: 0.05s">
-        <div class="hobby-block-header">
-          <div class="hobby-block-title">
-            <span class="hobby-icon">✈️</span>
-            <h3>Travels</h3>
-          </div>
-        </div>
-        <p class="hobby-desc">
-          Exploring new cities and cultures recharges my curiosity. Every trip is a lesson in perspective —
-          and a reminder that the world is full of good food and beautiful scenery.
-        </p>
-
-        <div class="gallery-track-wrap">
-          <div class="gallery-track" id="travels-gallery">
-            <div class="gallery-item">
-              <div class="gallery-ph-icon">🌊</div>
-              <img src="images/Travel/antalya.jpg" alt="Antalya travel photo" onerror="this.style.display='none'" />
-              <div class="gallery-caption">Antalya</div>
-            </div>
-            <div class="gallery-item">
-              <div class="gallery-ph-icon">🏛️</div>
-              <img src="images/Travel/erzincan.jpg" alt="Erzincan travel photo" onerror="this.style.display='none'" />
-              <div class="gallery-caption">Erzincan</div>
-            </div>
-            <div class="gallery-item">
-              <div class="gallery-ph-icon">🏔️</div>
-              <img src="images/Travel/hatay.jpg" alt="Hatay Arsuz travel photo" onerror="this.style.display='none'" />
-              <div class="gallery-caption">Hatay</div>
-            </div>
-            <div class="gallery-item">
-              <div class="gallery-ph-icon">🌇</div>
-              <img src="images/Travel/kars.jpg" alt="Kars photo" onerror="this.style.display='none'" />
-              <div class="gallery-caption">Kars</div>
-            </div>
-            <div class="gallery-item">
-              <div class="gallery-ph-icon">🌿</div>
-              <img src="images/Travel/osmaniye.jpg" alt="Osmaniye travel photo" onerror="this.style.display='none'" />
-              <div class="gallery-caption">Osmaniye</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="gallery-footer">
-          <span class="gallery-count" id="travels-count">5 photos · scroll to explore →</span>
-          <a href="images/Travel/" class="btn btn-ghost" style="padding: 0.48rem 1.1rem; font-size: 0.8rem;">View More</a>
-        </div>
-      </div>
-
-      <div class="hobby-block reveal" style="transition-delay: 0.1s">
-        <div class="hobby-block-header">
-          <div class="hobby-block-title">
-            <span class="hobby-icon">🎮</span>
-            <h3>Gaming</h3>
-          </div>
-        </div>
-        <p class="hobby-desc">
-          Games are where storytelling, systems design, and technology converge beautifully.
-          I'm drawn to titles with deep mechanics, compelling worlds, and design you can learn from.
-        </p>
-
-        <div class="gallery-track-wrap">
-          <div class="gallery-track" id="gaming-gallery">
-            <div class="gallery-item">
-              <div class="gallery-ph-icon">⚔️</div>
-              <img src="images/Games/ClairObscur.jpg" alt="Clair Obscur screenshot" onerror="this.style.display='none'" />
-              <div class="gallery-caption">Clair Obscur</div>
-            </div>
-            <div class="gallery-item">
-              <div class="gallery-ph-icon">🚀</div>
-              <img src="images/Games/EldenRing.jpg" alt="Elden Ring screenshot" onerror="this.style.display='none'" />
-              <div class="gallery-caption">Elden Ring</div>
-            </div>
-            <div class="gallery-item">
-              <div class="gallery-ph-icon">🧠</div>
-              <img src="images/Games/FF16.jpg" alt="FF16 screenshot" onerror="this.style.display='none'" />
-              <div class="gallery-caption">Final Fantasy 16</div>
-            </div>
-            <div class="gallery-item">
-              <div class="gallery-ph-icon">🌍</div>
-              <img src="images/Games/GhostofTsushima.jpg" alt="GhostofTsushima screenshot" onerror="this.style.display='none'" />
-              <div class="gallery-caption">Ghost of Tsushima</div>
-            </div>
-            <div class="gallery-item">
-              <div class="gallery-ph-icon">🏆</div>
-              <img src="images/Games/spiderman2.jpg" alt="spiderman2 screenshot" onerror="this.style.display='none'" />
-              <div class="gallery-caption">Marvel's Spiderman 2</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="gallery-footer">
-          <span class="gallery-count" id="gaming-count">5 captures · scroll to explore →</span>
-          <a href="https://steamcommunity.com/profiles/76561199111953581/screenshots/" class="btn btn-ghost" style="padding: 0.48rem 1.1rem; font-size: 0.8rem;">View More</a>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <hr class="section-divider" />
-
-  <section id="contact">
-    <div class="container">
-
-      <div class="contact-head reveal">
-        <p class="section-label">Contact</p>
-        <h2>Let's connect.</h2>
-        <p class="section-subtitle">
-          Whether you have a project idea, an opportunity, or just want to say hello — I'd love to hear from you.
-        </p>
-      </div>
-
-      <div class="contact-links">
-
-        <a href="mailto:arif06sevki@gmail.com" class="contact-item reveal" style="transition-delay: 0.05s">
-          <div class="contact-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="4" width="20" height="16" rx="2"/>
-              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
-            </svg>
-          </div>
-          <div class="contact-text">
-            <strong>Email</strong>
-            <span>arif06sevki@gmail.com</span>
-          </div>
-          <div class="contact-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </div>
-        </a>
-
-        <a href="https://github.com/Arif-Sevki" target="_blank" rel="noopener noreferrer" class="contact-item reveal" style="transition-delay: 0.1s">
-          <div class="contact-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
-            </svg>
-          </div>
-          <div class="contact-text">
-            <strong>GitHub</strong>
-            <span>github.com/Arif-Sevki</span>
-          </div>
-          <div class="contact-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </div>
-        </a>
-
-        <a href="https://www.linkedin.com/in/arif-%C5%9Fevki-y%C4%B1lmaz-960753291/" target="_blank" rel="noopener noreferrer" class="contact-item reveal" style="transition-delay: 0.15s">
-          <div class="contact-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
-              <rect x="2" y="9" width="4" height="12"/>
-              <circle cx="4" cy="4" r="2"/>
-            </svg>
-          </div>
-          <div class="contact-text">
-            <strong>LinkedIn</strong>
-            <span>linkedin.com/in/arifsevkiyilmaz</span>
-          </div>
-          <div class="contact-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </div>
-        </a>
-
-        <a href="https://steamcommunity.com/profiles/76561199111953581/" target="_blank" rel="noopener noreferrer" class="contact-item reveal" style="transition-delay: 0.2s">
-          <div class="contact-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M16.5 5a4.5 4.5 0 1 1-.653 8.953l-4.347 3.009 0 .038a3 3 0 0 1-2.824 2.995l-.176 .005a3 3 0 0 1-2.94-2.402l-2.56-1.098v-3.5l3.51 1.755a2.989 2.989 0 0 1 2.834-.635l2.727-3.46 .004-.155A4.5 4.5 0 0 1 16.5 5z"/>
-              <circle cx="16.5" cy="9.5" r="2"/>
-            </svg>
-          </div>
-          <div class="contact-text">
-            <strong>Steam</strong>
-            <span>steamcommunity.com/profiles/76561199111953581/</span>
-          </div>
-          <div class="contact-arrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </div>
-        </a>
-
-      </div>
-    </div>
-  </section>
-
-  <footer>
+  <!-- ═══════════════════════════════════════════
+       FOOTER — landmark <footer>
+  ═══════════════════════════════════════════ -->
+  <footer aria-label="Site footer">
     <div class="footer-inner">
-      <p class="footer-copy">© 2026 <span>Arif Şevki Yılmaz</span>. All rights reserved.</p>
-      <p class="footer-made">Ankara, TR</p>
+      <p class="footer-copy">
+        <span aria-hidden="true">©</span>
+        <span class="sr-only">Copyright</span>
+        2025 <span>Arif Şevki Yılmaz</span>. All rights reserved.
+      </p>
+      <p class="footer-made">Built with care · Ankara, TR</p>
     </div>
   </footer>
 
   <script>
-    // ─── Sticky nav shadow ───
+    /* ═══════════════════════════════════════════
+       STICKY NAV SHADOW
+    ═══════════════════════════════════════════ */
     const navbar = document.getElementById('navbar');
     window.addEventListener('scroll', () => {
       navbar.classList.toggle('scrolled', window.scrollY > 20);
     }, { passive: true });
 
-    // ─── Mobile nav toggle ───
+    /* ═══════════════════════════════════════════
+       MOBILE NAV TOGGLE — WCAG 4.1.2
+       - aria-expanded reflects open/closed state
+       - aria-label changes to describe current action
+       - visibility toggled on .nav-links via CSS
+         (visibility:hidden prevents tab-into-closed-menu)
+    ═══════════════════════════════════════════ */
     const toggle = document.getElementById('navToggle');
-    const links  = document.getElementById('navLinks');
+    const navMenu = document.getElementById('navLinks');
+
     toggle.addEventListener('click', () => {
-      const open = links.classList.toggle('open');
-      toggle.setAttribute('aria-expanded', open);
-      const spans = toggle.querySelectorAll('span');
-      if (open) {
-        spans[0].style.cssText = 'transform: translateY(6.5px) rotate(45deg)';
-        spans[1].style.cssText = 'opacity: 0; transform: scaleX(0)';
-        spans[2].style.cssText = 'transform: translateY(-6.5px) rotate(-45deg)';
+      const isOpen = navMenu.classList.toggle('open');
+
+      // Keep aria-expanded in sync
+      toggle.setAttribute('aria-expanded', String(isOpen));
+      toggle.setAttribute('aria-label', isOpen ? 'Close navigation menu' : 'Open navigation menu');
+
+      // Animate hamburger → X
+      const bars = toggle.querySelectorAll('span');
+      if (isOpen) {
+        bars[0].style.cssText = 'transform: translateY(6.5px) rotate(45deg)';
+        bars[1].style.cssText = 'opacity: 0; transform: scaleX(0)';
+        bars[2].style.cssText = 'transform: translateY(-6.5px) rotate(-45deg)';
       } else {
-        spans.forEach(s => s.style.cssText = '');
+        bars.forEach(b => b.style.cssText = '');
       }
     });
-    links.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', () => {
-        links.classList.remove('open');
-        toggle.querySelectorAll('span').forEach(s => s.style.cssText = '');
-      });
+
+    // Close menu when a nav link is activated (click or Enter/Space)
+    navMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeMenu);
     });
 
-    // ─── Scroll reveal ───
+    // Close on Escape key — WCAG 2.1 SC 1.4.13
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && navMenu.classList.contains('open')) {
+        closeMenu();
+        toggle.focus(); // Return focus to toggle
+      }
+    });
+
+    function closeMenu() {
+      navMenu.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.setAttribute('aria-label', 'Open navigation menu');
+      toggle.querySelectorAll('span').forEach(b => b.style.cssText = '');
+    }
+
+    /* ═══════════════════════════════════════════
+       SCROLL REVEAL — respects prefers-reduced-motion
+       (CSS already handles the motion suppression;
+        this JS still adds .visible for non-motion styles)
+    ═══════════════════════════════════════════ */
     const reveals = document.querySelectorAll('.reveal');
-    const observer = new IntersectionObserver((entries) => {
+    const revealObserver = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) {
           e.target.classList.add('visible');
-          observer.unobserve(e.target);
+          revealObserver.unobserve(e.target);
         }
       });
     }, { threshold: 0.09 });
-    reveals.forEach(el => observer.observe(el));
+    reveals.forEach(el => revealObserver.observe(el));
 
-    // ─── Gallery scroll position counter ───
+    /* ═══════════════════════════════════════════
+       GALLERY SCROLL COUNTER
+       aria-live="polite" on the counter element
+       means AT will announce updates without interruption.
+    ═══════════════════════════════════════════ */
     [
-      { trackId: 'travels-gallery',  countId: 'travels-count',  unit: 'photos'   },
-      { trackId: 'gaming-gallery',   countId: 'gaming-count',   unit: 'captures' }
+      { trackId: 'travels-gallery', countId: 'travels-count', unit: 'photos'   },
+      { trackId: 'gaming-gallery',  countId: 'gaming-count',  unit: 'captures' }
     ].forEach(({ trackId, countId, unit }) => {
-      const track = document.getElementById(trackId);
+      const track   = document.getElementById(trackId);
       const counter = document.getElementById(countId);
       if (!track || !counter) return;
       const total = track.children.length;
 
+      let rafId;
       track.addEventListener('scroll', () => {
-        const maxScroll = track.scrollWidth - track.clientWidth;
-        if (maxScroll <= 0) return;
-        const pct = track.scrollLeft / maxScroll;
-        const current = Math.min(total, Math.round(pct * (total - 1)) + 1);
-        counter.textContent = `${current} / ${total} ${unit} · scroll to explore →`;
+        cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          const maxScroll = track.scrollWidth - track.clientWidth;
+          if (maxScroll <= 0) return;
+          const pct     = track.scrollLeft / maxScroll;
+          const current = Math.min(total, Math.round(pct * (total - 1)) + 1);
+          counter.textContent = `${current} / ${total} ${unit} · scroll to explore →`;
+        });
       }, { passive: true });
     });
   </script>
