@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="E-portfolio of Arif Şevki Yılmaz, a Computer Engineering student at AYBÜ, showcasing software projects, skills, and personal interests." />
+  <title>Arif Şevki Yılmaz — Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── CSS Variables (Catppuccin Mocha Theme) ─── */
+    :root {
+      --bg:           #1e1e2e; /* Mocha Base */
+      --bg-card:      #181825; /* Mocha Mantle */
+      --bg-elevated:  #313244; /* Mocha Surface0 */
+      --border:       rgba(180, 190, 254, 0.12); /* Mocha Lavender transparent */
+      --border-hover: rgba(180, 190, 254, 0.35); 
+      --accent:       #f5e0dc; /* Mocha Rosewater */
+      --accent-muted: #b4befe; /* Mocha Lavender */
+      --accent-glow:  rgba(180, 190, 254, 0.08);
+      --text-h:       #cdd6f4; /* Mocha Text */
+      --text-body:    #a6adc8; /* Mocha Subtext0 */
+      --text-muted:   #bac2de; /* Mocha Subtext1 */
+      --font-serif:   'Lora', Georgia, serif;
+      --font-sans:    'Plus Jakarta Sans', system-ui, sans-serif;
+      --radius:       12px;
+      --radius-sm:    8px;
+      --transition:   0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ─── Reset & Base ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-body);
+      font-family: var(--font-sans);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Grain texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4; /* Slightly lowered for Mocha color harmony */
+    }
+
+    /* ─── Scrollbar ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent-muted); border-radius: 3px; }
+
+    /* ─── Selection ─── */
+    ::selection { background: rgba(180, 190, 254, 0.2); color: var(--text-h); }
+
+    /* ─── Typography Scale ─── */
+    h1, h2, h3, h4 {
+      font-family: var(--font-serif);
+      color: var(--text-h);
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+    h1 { font-size: clamp(2.6rem, 6vw, 4.2rem); font-weight: 700; }
+    h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 600; }
+    h3 { font-size: 1.1rem; font-weight: 600; }
+    p  { font-size: 1rem; }
+    a  { color: var(--accent-muted); text-decoration: none; transition: color var(--transition); }
+    a:hover { color: var(--text-h); }
+
+    /* ─── Layout Containers ─── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      position: relative;
+      z-index: 1;
+    }
+    section { padding: 6rem 0; }
+
+    /* ─── Divider ─── */
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── Section Label ─── */
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--font-sans);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent-muted);
+      margin-bottom: 1rem;
+    }
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 22px;
+      height: 1px;
+      background: var(--accent-muted);
+    }
+
+    /* ─── Section Subtitle ─── */
+    .section-subtitle {
+      font-size: 0.97rem;
+      color: var(--text-body);
+      margin-top: 0.6rem;
+      max-width: 520px;
+      line-height: 1.65;
+    }
+    .section-head { margin-bottom: 2.8rem; }
+
+    /* ─── Buttons ─── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.6rem;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: all var(--transition);
+      border: none;
+    }
+    .btn-primary { background: var(--accent-muted); color: #11111b; }
+    .btn-primary:hover {
+      background: #cba6f7; /* Mocha Mauve accent shift on hover */
+      color: #11111b;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(180, 190, 254, 0.25);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-h);
+      border: 1px solid var(--border-hover);
+    }
+    .btn-ghost:hover {
+      background: var(--accent-glow);
+      color: var(--text-h);
+      border-color: var(--accent-muted);
+    }
+
+    /* ─── Navigation ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 1.1rem 0;
+      background: rgba(24, 24, 37, 0.85); /* Uyarlandı */
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+      border-bottom: 1px solid var(--border);
+      transition: box-shadow var(--transition);
+    }
+    nav.scrolled { box-shadow: 0 4px 32px rgba(0,0,0,0.4); }
+
+    .nav-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+    }
+    .nav-logo {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-h);
+      letter-spacing: 0.01em;
+    }
+    .nav-logo span { color: var(--accent-muted); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2.2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text-body);
+      letter-spacing: 0.02em;
+      transition: color var(--transition);
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px; left: 0; right: 0;
+      height: 1px;
+      background: var(--accent-muted);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform var(--transition);
+    }
+    .nav-links a:hover { color: var(--text-h); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+      background: none;
+      border: none;
+    }
+    .nav-toggle span {
+      display: block;
+      width: 22px;
+      height: 1.5px;
+      background: var(--text-h);
+      transition: all var(--transition);
+    }
+
+    /* ─── Hero ─── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-top: 5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Catppuccin motif mesh glow */
+    #hero::after {
+      content: '';
+      position: absolute;
+      top: -100px; right: -80px;
+      width: 460px; height: 460px;
+      border-radius: 50%;
+      border: 1px solid rgba(180, 190, 254, 0.05);
+      box-shadow:
+        0 0 0 40px rgba(180, 190, 254, 0.02),
+        0 0 0 90px rgba(180, 190, 254, 0.015),
+        0 0 0 150px rgba(180, 190, 254, 0.007);
+      pointer-events: none;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 4rem;
+      align-items: center;
+      width: 100%;
+    }
+
+    .hero-kicker {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent-muted);
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.2s forwards;
+    }
+    .hero-name {
+      opacity: 0;
+      animation: fadeUp 0.7s 0.35s forwards;
+      margin-bottom: 0.5rem;
+    }
+    .hero-name em { font-style: italic; color: var(--accent-muted); }
+    .hero-subtitle {
+      font-family: var(--font-sans);
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--text-body);
+      font-weight: 400;
+      margin-bottom: 1.4rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.5s forwards;
+    }
+    .hero-desc {
+      font-size: 1rem;
+      color: var(--text-body);
+      margin-bottom: 2.4rem;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.65s forwards;
+      max-width: 440px;
+    }
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.7s 0.8s forwards;
+    }
+
+    .hero-photo-col {
+      opacity: 0;
+      animation: fadeUp 0.9s 0.5s forwards;
+      flex-shrink: 0;
+    }
+    .hero-photo-frame {
+      width: 256px;
+      height: 316px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-hover);
+      overflow: hidden;
+      background: var(--bg-card);
+      position: relative;
+      box-shadow:
+        0 24px 64px rgba(0,0,0,0.5),
+        0 0 0 5px rgba(180, 190, 254, 0.04);
+    }
+    .hero-photo-frame::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(145deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+      z-index: 0;
+    }
+    .hero-photo-frame::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 80px;
+      background: linear-gradient(to top, rgba(24,24,37,0.6), transparent);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .hero-photo-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.5s ease;
+    }
+    .hero-photo-frame:hover img { transform: scale(1.03); }
+    .photo-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .photo-placeholder svg { width: 52px; height: 52px; color: rgba(180, 190, 254, 0.2); }
+    .photo-placeholder span {
+      font-size: 0.72rem;
+      color: var(--text-body);
+      letter-spacing: 0.1em;
+      font-weight: 500;
+    }
+
+    /* ─── About ─── */
+    #about { padding-top: 7rem; }
+    .about-intro { margin-bottom: 3rem; }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    .about-bio p + p { margin-top: 1.1rem; }
+    .about-bio p { font-size: 0.97rem; }
+
+    .edu-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-top: 1.8rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .edu-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: linear-gradient(to bottom, var(--accent-muted), transparent);
+    }
+    .edu-card .uni { font-size: 0.82rem; color: var(--accent-muted); font-weight: 600; margin-bottom: 0.35rem; letter-spacing: 0.04em; }
+    .edu-card h4 { font-family: var(--font-sans); font-size: 0.98rem; font-weight: 600; color: var(--text-h); margin-bottom: 0.2rem; }
+    .edu-card .year { font-size: 0.8rem; color: var(--text-body); }
+
+    .skills-title {
+      font-family: var(--font-sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-body);
+      margin-bottom: 0.85rem;
+    }
+    .skills-group + .skills-group { margin-top: 1.6rem; }
+    .skill-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .skill-tag {
+      display: inline-block;
+      padding: 0.3rem 0.75rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-h);
+      transition: all var(--transition);
+    }
+    .skill-tag:hover {
+      border-color: var(--accent-muted);
+      color: #11111b;
+      background: var(--accent-muted);
+    }
+
+    /* ─── Projects ─── */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.4rem;
+    }
+    .project-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      transition: all var(--transition);
+      position: relative;
+      overflow: hidden;
+      color: inherit;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .project-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at top left, var(--accent-glow), transparent 65%);
+      opacity: 0;
+      transition: opacity var(--transition);
+      pointer-events: none;
+    }
+    .project-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 44px rgba(0,0,0,0.4);
+      color: inherit;
+    }
+    .project-card:hover::after { opacity: 1; }
+
+    .project-thumb {
+      width: 100%;
+      height: 162px;
+      overflow: hidden;
+      border-radius: var(--radius) var(--radius) 0 0;
+      background: var(--bg-elevated);
+      flex-shrink: 0;
+      position: relative;
+    }
+    .project-thumb::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          45deg,
+          rgba(180,190,254,0.03) 0px,
+          rgba(180,190,254,0.03) 1px,
+          transparent 1px,
+          transparent 24px
+        ),
+        linear-gradient(160deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+      z-index: 0;
+    }
+    .project-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.45s ease;
+    }
+    .project-card:hover .project-thumb img { transform: scale(1.05); }
+    .project-thumb-icon {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.6rem;
+      opacity: 0.2;
+      z-index: 0;
+    }
+
+    .project-body {
+      padding: 1.2rem 1.4rem 1.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      flex: 1;
+    }
+    .project-meta {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.6rem;
+    }
+    .project-card h3 {
+      font-family: var(--font-sans);
+      font-size: 0.97rem;
+      font-weight: 700;
+      color: var(--text-h);
+      line-height: 1.3;
+    }
+    .project-gh-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-body);
+      letter-spacing: 0.04em;
+      flex-shrink: 0;
+      margin-top: 1px;
+      transition: color var(--transition);
+    }
+    .project-gh-badge svg { width: 13px; height: 13px; }
+    .project-card:hover .project-gh-badge { color: var(--accent-muted); }
+
+    .project-desc {
+      font-size: 0.85rem;
+      color: var(--text-body);
+      line-height: 1.65;
+      flex: 1;
+    }
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.15rem;
+    }
+    .tech-tag {
+      padding: 0.2rem 0.6rem;
+      background: rgba(180,190,254,0.06);
+      border: 1px solid rgba(180,190,254,0.15);
+      border-radius: 4px;
+      font-size: 0.71rem;
+      font-weight: 600;
+      color: var(--accent-muted);
+      letter-spacing: 0.03em;
+    }
+
+    /* ─── Hobbies & Interests ─── */
+    .hobby-block + .hobby-block { margin-top: 3.5rem; }
+    .hobby-block-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .hobby-block-title {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .hobby-icon { font-size: 1.1rem; line-height: 1; }
+    .hobby-block-title h3 {
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-h);
+    }
+    .hobby-desc {
+      font-size: 0.87rem;
+      color: var(--text-body);
+      margin-bottom: 1.2rem;
+      max-width: 500px;
+      line-height: 1.65;
+    }
+
+    .gallery-track-wrap { position: relative; }
+    .gallery-track-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 56px;
+      bottom: 14px;
+      background: linear-gradient(to right, transparent, var(--bg) 90%);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .gallery-track {
+      display: flex;
+      gap: 1rem;
+      overflow-x: auto;
+      padding-bottom: 0.6rem;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(180, 190, 254, 0.2) transparent;
+    }
+    .gallery-track::-webkit-scrollbar { height: 3px; }
+    .gallery-track::-webkit-scrollbar-track { background: transparent; }
+    .gallery-track::-webkit-scrollbar-thumb {
+      background: rgba(180, 190, 254, 0.2);
+      border-radius: 2px;
+    }
+
+    .gallery-item {
+      flex: 0 0 auto;
+      width: 272px;
+      height: 176px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      scroll-snap-align: start;
+      position: relative;
+      transition: all var(--transition);
+    }
+    .gallery-item:hover {
+      border-color: var(--border-hover);
+      box-shadow: 0 10px 32px rgba(0,0,0,0.35);
+      transform: translateY(-2px);
+    }
+    .gallery-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          -45deg,
+          rgba(180,190,254,0.03) 0px,
+          rgba(180,190,254,0.03) 1px,
+          transparent 1px,
+          transparent 20px
+        ),
+        linear-gradient(155deg, var(--bg-elevated) 0%, var(--bg-card) 100%);
+      z-index: 0;
+    }
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      position: relative;
+      z-index: 1;
+      transition: transform 0.45s ease;
+    }
+    .gallery-item:hover img { transform: scale(1.07); }
+    .gallery-ph-icon {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.8rem;
+      opacity: 0.15;
+      z-index: 0;
+    }
+    .gallery-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 0.5rem 0.75rem;
+      background: linear-gradient(to top, rgba(17,17,27,0.85), transparent);
+      font-size: 0.74rem;
+      font-weight: 500;
+      color: var(--text-h);
+      z-index: 2;
+      letter-spacing: 0.02em;
+    }
+
+    .gallery-footer {
+      margin-top: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+    .gallery-count { font-size: 0.77rem; color: var(--text-body); }
+
+    /* ─── Contact ─── */
+    #contact { padding-bottom: 8rem; }
+    .contact-head { margin-bottom: 3rem; }
+    .contact-links {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 1.2rem 1.4rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      transition: all var(--transition);
+      color: var(--text-h);
+      text-decoration: none;
+      max-width: 440px;
+    }
+    .contact-item:hover {
+      border-color: var(--border-hover);
+      background: var(--bg-elevated);
+      color: var(--text-h);
+      transform: translateX(4px);
+    }
+    .contact-icon {
+      width: 40px; height: 40px;
+      border-radius: 9px;
+      background: var(--accent-glow);
+      border: 1px solid var(--border-hover);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      color: var(--accent-muted);
+    }
+    .contact-icon svg { width: 18px; height: 18px; }
+    .contact-text { flex: 1; }
+    .contact-text strong { display: block; font-size: 0.88rem; font-weight: 600; color: var(--text-h); margin-bottom: 0.15rem; }
+    .contact-text span { font-size: 0.8rem; color: var(--text-body); }
+    .contact-arrow { color: var(--text-body); }
+    .contact-arrow svg { width: 16px; height: 16px; }
+
+    /* ─── Footer ─── */
+    footer {
+      padding: 2rem 0;
+      border-top: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+    }
+    .footer-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .footer-copy { font-size: 0.78rem; color: var(--text-body); }
+    .footer-copy span { color: var(--accent-muted); }
+    .footer-made { font-size: 0.75rem; color: var(--text-body); letter-spacing: 0.03em; }
+
+    /* ─── Animations ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 820px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 2.6rem; }
+      .hero-photo-col { order: -1; display: flex; justify-content: center; }
+      .hero-photo-frame { width: 190px; height: 240px; }
+      .hero-desc { max-width: 100%; }
+    }
+
+    @media (max-width: 720px) {
+      .nav-links {
+        position: fixed;
+        top: 0; right: 0;
+        width: min(280px, 80vw);
+        height: 100vh;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        background: var(--bg-card);
+        border-left: 1px solid var(--border);
+        padding: 5rem 2rem 2rem;
+        transform: translateX(100%);
+        transition: transform var(--transition);
+        z-index: 99;
+      }
+      .nav-links.open { transform: translateX(0); }
+      .nav-links li { width: 100%; }
+      .nav-links a {
+        display: block;
+        padding: 0.8rem 0;
+        font-size: 1rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-h);
+      }
+      .nav-links a::after { display: none; }
+      .nav-toggle { display: flex; }
+      .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+      section { padding: 4.5rem 0; }
+      #hero { padding-top: 7rem; }
+      .hero-cta { flex-direction: column; align-items: flex-start; }
+      .projects-grid { grid-template-columns: 1fr; }
+      .contact-item { max-width: 100%; }
+      .gallery-item { width: 234px; height: 152px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="#hero" class="nav-logo">ASY<span>.</span></a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#about">About</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#hobbies">Hobbies</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section id="hero">
+    <div class="container">
+      <div class="hero-grid">
+
+        <div class="hero-text">
+          <p class="hero-kicker"> </p>
+          <h1 class="hero-name">Arif Şevki<br><em>Yılmaz</em></h1>
+          <p class="hero-subtitle">Computer Engineering Student · AYBÜ</p>
+          <p class="hero-desc">
+            Passionate about artificial intelligence engineering, building thoughtful software and exploring the intersection
+            of systems, algorithms. 
+          </p>
+          <div class="hero-cta">
+            <a href="#projects" class="btn btn-primary">View Projects</a>
+            <a href="#contact" class="btn btn-ghost">Get in Touch</a>
+          </div>
+        </div>
+
+        <div class="hero-photo-col">
+          <div class="hero-photo-frame">
+            <div class="photo-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <span>profile.jpg</span>
+            </div>
+            <img src="images/profil2.jpg" alt="Arif Şevki Yılmaz" onerror="this.style.display='none'" />
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider" />
+
+  <section id="about">
+    <div class="container">
+
+      <div class="about-intro reveal">
+        <p class="section-label">About Me</p>
+        <h2>Crafting code with <em style="color:var(--accent-muted)">purpose &amp; precision.</em></h2>
+        <p class="section-subtitle">
+          A glimpse into who I am, where I study, and the skills I've built along the way.
+        </p>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-bio reveal" style="transition-delay: 0.05s">
+          <p>
+            I'm Arif Şevki Yılmaz, a Computer Engineering student at Ankara Yıldırım Beyazıt University, 
+            expecting to graduate in 2027 . I have a genuine curiosity for how things work—from low-level 
+            microprocessor systems to high-level data abstractions.
+          </p>
+          <p>
+            Throughout my studies, I have built a solid foundation in C/C++, Java, and Python, applying them 
+            to diverse challenges. My academic work ranges from developing smart home automation architectures 
+            to analyzing air pollution data using signal processing and scientific computing tools like Pandas and NumPy. 
+            Today, my greatest passion lies in AI Engineering, where I aim to combine my system design skills with 
+            artificial intelligence to build intelligent, data-driven solutions.
+          </p>
+          <p>
+            Beyond the screen, I believe in the importance of stepping back to recharge. When I'm not writing code, 
+            you can usually find me traveling to explore new environments, or immersing myself in the rich worlds, 
+            stories, and mechanics of single-player PC games.
+          </p>
+          <div class="edu-card">
+            <p class="uni">ANKARA YILDIRIM BEYAZIT ÜNİVERSİTESİ</p>
+            <h4>Computer Engineering</h4>
+            <p class="year">2022 – Present · Ankara, Turkey</p>
+          </div>
+        </div>
+
+        <div class="reveal" style="transition-delay: 0.15s">
+          <div class="skills-group">
+            <p class="skills-title">Languages</p>
+            <div class="skill-tags">
+              <span class="skill-tag">Java</span>
+              <span class="skill-tag">C</span>
+              <span class="skill-tag">C++</span>
+              <span class="skill-tag">Python</span>
+            </div>
+          </div>
+          <div class="skills-group">
+            <p class="skills-title">Concepts &amp; Tools</p>
+            <div class="skill-tags">
+              <span class="skill-tag">Data Structures</span>
+              <span class="skill-tag">Algorithms</span>
+              <span class="skill-tag">OOP</span>
+              <span class="skill-tag">Git &amp; GitHub</span>
+              <span class="skill-tag">Pandas</span>
+             <span class="skill-tag">NumPy</span>
+              <span class="skill-tag">Matplotlib</span>
+            </div>
+          </div>
+          <div class="skills-group">
+            <p class="skills-title">Interests</p>
+            <div class="skill-tags">
+              <span class="skill-tag">Systems Programming</span>
+              <span class="skill-tag">Data Mining</span>
+              <span class="skill-tag">Machine Learning</span>
+              <span class="skill-tag">Natural Language Processing</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="section-divider" />
+
+  <section id="projects">
+    <div class="container">
+
+      <div class="section-head reveal">
+        <p class="section-label">Projects</p>
+        <h2>Things I've built.</h2>
+        <p class="section-subtitle">
+          A selection of personal and academic work — click any card to view the full source on GitHub.
+        </p>
+      </div>
+
+      <div class="projects-grid">
+
+        <a href="https://github.com/Arif-Sevki/Dungeon_Game" class="project-card reveal" style="transition-delay: 0.05s" aria-label="Dungeon Adventure Game on GitHub">
+          <div class="project-thumb">
+            <div class="project-thumb-icon">🗂️</div>
+            <img src="images/DungeonGame.jpg" alt="Dungeon Adventure Game screenshot" onerror="this.style.display='none'" />
+          </div>
+          <div class="project-body">
+            <div class="project-meta">
+              <h3>Dungeon Adventure Game</h3>
+              <span class="project-gh-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                </svg>
+                GitHub
+              </span>
+            </div>
+            <p class="project-desc">A text-based role-playing game where players explore a dungeon, interact with enemies, 
+              collect items, and navigate through rooms. The game is built using C and follows a modular structure, with different source 
+              files managing various aspects of the game, such as the map, player, items, and enemies.</p>
+            <div class="tech-stack">
+              <span class="tech-tag">C</span>
+              <span class="tech-tag">File I/O</span>
+              <span class="tech-tag">OOP</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="https://github.com/yselimc/OOP_Group19" class="project-card reveal" style="transition-delay: 0.1s" aria-label="Smart Home Project on GitHub">
+          <div class="project-thumb">
+            <div class="project-thumb-icon">🔗</div>
+            <img src="images/SmartHomeProject.jpeg" alt="Smart Home Project screenshot" onerror="this.style.display='none'" />
+          </div>
+          <div class="project-body">
+            <div class="project-meta">
+              <h3>Smart Home System</h3>
+              <span class="project-gh-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                </svg>
+                GitHub
+              </span>
+            </div>
+            <p class="project-desc">This project aims to develop a Smart Home Automation System that allows 
+              smart home devices to be managed through a central system. This system will allow users to remotely 
+              control their devices and access instant information about events taking place in their homes.</p>
+            <div class="tech-stack">
+              <span class="tech-tag">C++</span>
+              <span class="tech-tag">Qt</span>
+              <span class="tech-tag">HTML</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="https://github.com/mecebeci/CENG327-Group6-Project" class="project-card reveal" style="transition-delay: 0.15s" aria-label="Turkey Air Quality Analysis System on GitHub">
+          <div class="project-thumb">
+            <div class="project-thumb-icon">🧩</div>
+            <img src="images/AirPollution.jpg" alt="Turkey Air Quality Analysis System screenshot" onerror="this.style.display='none'" />
+          </div>
+          <div class="project-body">
+            <div class="project-meta">
+              <h3>Turkey Air Quality Analysis System</h3>
+              <span class="project-gh-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                </svg>
+                GitHub
+              </span>
+            </div>
+            <p class="project-desc">Signal Processing for Remote Sensing of Air Pollution. 
+              This project analyzes air pollution data across Turkey using signal processing and scientific 
+              computing techniques and gives the visualization of pollution patterns.</p>
+            <div class="tech-stack">
+              <span class="tech-tag">Python</span>
+              <span class="tech-tag">NumPy, SciPy</span>
+              <span class="tech-tag">Pandas </span>
+              <span class="tech-tag">Matplotlib </span>
+              <span class="tech-tag">PyQt5 </span>
+            </div>
+          </div>
+        </a>
+
+        <a href="https://github.com/Arif-Sevki/Research-about-Heterogeneous-Computing-via-the-Cell-Broadband-Engine-Architecture/blob/main/Heterogeneous_Computing_via_the_Cell_Broadband_Engine_Architecture.pdf"
+         class="project-card reveal" style="transition-delay: 0.2s" aria-label="Research about CELLBE on GitHub">
+          <div class="project-thumb">
+            <div class="project-thumb-icon">📚</div>
+            <img src="images/CELLBE.jpg" alt="Research-about-Heterogeneous-Computing-via-the-Cell-Broadband-Engine-Architecture screenshot" onerror="this.style.display='none'" />
+          </div>
+          <div class="project-body">
+            <div class="project-meta">
+              <h3>Research about Heterogeneous Computing via the Cell Broadband Engine Architecture</h3>
+              <span class="project-gh-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                </svg>
+                GitHub
+              </span>
+            </div>
+            <p class="project-desc">This article examines the Cell Broadband Engine's unique heterogeneous architecture and 
+              its shift toward software-managed memory to overcome hardware limitations. It also evaluates the processor's legacy and 
+              its lasting influence on modern parallel computing. </p>
+            <div class="tech-stack">
+              <span class="tech-tag">LaTeX</span>
+              <span class="tech-tag">Microprocessors</span>
+              <span class="tech-tag">Heterogeneous Computing</span>
+              <span class="tech-tag">Cell BE</span>
+            </div>
+          </div>
+        </a>
+
+        <a href="#" class="project-card reveal" style="transition-delay: 0.15s" aria-label="Next Project on GitHub">
+          <div class="project-thumb">
+            <div class="project-thumb-icon">📚</div>
+            <img src="image.jpeg" alt="Next Project screenshot" onerror="this.style.display='none'" />
+          </div>
+          <div class="project-body">
+            <div class="project-meta">
+              <h3>Next Project</h3>
+              <span class="project-gh-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                </svg>
+                GitHub
+              </span>
+            </div>
+            <p class="project-desc">Coming Soon</p>
+            <div class="tech-stack">
+              <span class="tech-tag">...</span>
+              <span class="tech-tag">...</span>
+
+            </div>
+          </div>
+        </a>
+
+        
+
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider" />
+
+  <section id="hobbies">
+    <div class="container">
+
+      <div class="section-head reveal">
+        <p class="section-label">Hobbies</p>
+        <h2>Beyond the code.</h2>
+        <p class="section-subtitle">
+          The experiences that slow down the pace of my life, help me relax, and allow me to disconnect from the world.
+        </p>
+      </div>
+
+      <div class="hobby-block reveal" style="transition-delay: 0.05s">
+        <div class="hobby-block-header">
+          <div class="hobby-block-title">
+            <span class="hobby-icon">✈️</span>
+            <h3>Travels</h3>
+          </div>
+        </div>
+        <p class="hobby-desc">
+          Exploring new cities and cultures recharges my curiosity. Every trip is a lesson in perspective —
+          and a reminder that the world is full of good food and beautiful scenery.
+        </p>
+
+        <div class="gallery-track-wrap">
+          <div class="gallery-track" id="travels-gallery">
+            <div class="gallery-item">
+              <div class="gallery-ph-icon">🏛️</div>
+              <img src="images/travel/Antalya.jpg" alt="Antalya travel photo" onerror="this.style.display='none'" />
+              <div class="gallery-caption">Antalya</div>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-ph-icon">🌊</div>
+              <img src="images/travel/Erzincan.jpg" alt="Erzincan travel photo" onerror="this.style.display='none'" />
+              <div class="gallery-caption">Erzincan</div>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-ph-icon">🏔️</div>
+              <img src="images/travel/Hatay_Arsuz.jpg" alt="Hatay Arsuz travel photo" onerror="this.style.display='none'" />
+              <div class="gallery-caption">Hatay</div>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-ph-icon">🌇</div>
+              <img src="images/travel/Kars.jpg" alt="Kars photo" onerror="this.style.display='none'" />
+              <div class="gallery-caption">Kars</div>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-ph-icon">🌿</div>
+              <img src="images/travel/Osmaniye_Düziçi.jpg" alt="Osmaniye travel photo" onerror="this.style.display='none'" />
+              <div class="gallery-caption">Osmaniye</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="gallery-footer">
+          <span class="gallery-count" id="travels-count">5 photos · scroll to explore →</span>
+          <a href="images/travel/" class="btn btn-ghost" style="padding: 0.48rem 1.1rem; font-size: 0.8rem;">View More</a>
+        </div>
+      </div>
+
+      <div class="hobby-block reveal" style="transition-delay: 0.1s">
+        <div class="hobby-block-header">
+          <div class="hobby-block-title">
+            <span class="hobby-icon">🎮</span>
+            <h3>Gaming</h3>
+          </div>
+        </div>
+        <p class="hobby-desc">
+          Games are where storytelling, systems design, and technology converge beautifully.
+          I'm drawn to titles with deep mechanics, compelling worlds, and design you can learn from.
+        </p>
+
+        <div class="gallery-track-wrap">
+          <div class="gallery-track" id="gaming-gallery">
+            <div class="gallery-item">
+              <div class="gallery-ph-icon">⚔️</div>
+              <img src="images/Games/ClairObscur.jpg" alt="Clair Obscur screenshot" onerror="this.style.display='none'" />
+              <div class="gallery-caption">Clair Obscur</div>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-ph-icon">🚀</div>
+              <img src="images/Games/EldenRing.jpg" alt="Elden Ring screenshot" onerror="this.style.display='none'" />
+              <div class="gallery-caption">Elden Ring</div>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-ph-icon">🧠</div>
+              <img src="images/Games/FF16.jpg" alt="FF16 screenshot" onerror="this.style.display='none'" />
+              <div class="gallery-caption">Final Fantasy 16</div>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-ph-icon">🌍</div>
+              <img src="images/Games/GhostofTsushima.jpg" alt="GhostofTsushima screenshot" onerror="this.style.display='none'" />
+              <div class="gallery-caption">Ghost of Tsushima</div>
+            </div>
+            <div class="gallery-item">
+              <div class="gallery-ph-icon">🏆</div>
+              <img src="images/Games/spiderman2.jpg" alt="spiderman2 screenshot" onerror="this.style.display='none'" />
+              <div class="gallery-caption">Marvel's Spiderman 2</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="gallery-footer">
+          <span class="gallery-count" id="gaming-count">5 captures · scroll to explore →</span>
+          <a href="https://steamcommunity.com/profiles/76561199111953581/screenshots/" class="btn btn-ghost" style="padding: 0.48rem 1.1rem; font-size: 0.8rem;">View More</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <hr class="section-divider" />
+
+  <section id="contact">
+    <div class="container">
+
+      <div class="contact-head reveal">
+        <p class="section-label">Contact</p>
+        <h2>Let's connect.</h2>
+        <p class="section-subtitle">
+          Whether you have a project idea, an opportunity, or just want to say hello — I'd love to hear from you.
+        </p>
+      </div>
+
+      <div class="contact-links">
+
+        <a href="mailto:arif06sevki@gmail.com" class="contact-item reveal" style="transition-delay: 0.05s">
+          <div class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </svg>
+          </div>
+          <div class="contact-text">
+            <strong>Email</strong>
+            <span>arif06sevki@gmail.com</span>
+          </div>
+          <div class="contact-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        <a href="https://github.com/Arif-Sevki" target="_blank" rel="noopener noreferrer" class="contact-item reveal" style="transition-delay: 0.1s">
+          <div class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+            </svg>
+          </div>
+          <div class="contact-text">
+            <strong>GitHub</strong>
+            <span>github.com/Arif-Sevki</span>
+          </div>
+          <div class="contact-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        <a href="https://www.linkedin.com/in/arif-%C5%9Fevki-y%C4%B1lmaz-960753291/" target="_blank" rel="noopener noreferrer" class="contact-item reveal" style="transition-delay: 0.15s">
+          <div class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+              <rect x="2" y="9" width="4" height="12"/>
+              <circle cx="4" cy="4" r="2"/>
+            </svg>
+          </div>
+          <div class="contact-text">
+            <strong>LinkedIn</strong>
+            <span>linkedin.com/in/arifsevkiyilmaz</span>
+          </div>
+          <div class="contact-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+        <a href="https://steamcommunity.com/profiles/76561199111953581/" target="_blank" rel="noopener noreferrer" class="contact-item reveal" style="transition-delay: 0.2s">
+          <div class="contact-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16.5 5a4.5 4.5 0 1 1-.653 8.953l-4.347 3.009 0 .038a3 3 0 0 1-2.824 2.995l-.176 .005a3 3 0 0 1-2.94-2.402l-2.56-1.098v-3.5l3.51 1.755a2.989 2.989 0 0 1 2.834-.635l2.727-3.46 .004-.155A4.5 4.5 0 0 1 16.5 5z"/>
+              <circle cx="16.5" cy="9.5" r="2"/>
+            </svg>
+          </div>
+          <div class="contact-text">
+            <strong>Steam</strong>
+            <span>steamcommunity.com/profiles/76561199111953581/</span>
+          </div>
+          <div class="contact-arrow">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <p class="footer-copy">© 2025 <span>Arif Şevki Yılmaz</span>. All rights reserved.</p>
+      <p class="footer-made">Built with care · Ankara, TR</p>
+    </div>
+  </footer>
+
+  <script>
+    // ─── Sticky nav shadow ───
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    // ─── Mobile nav toggle ───
+    const toggle = document.getElementById('navToggle');
+    const links  = document.getElementById('navLinks');
+    toggle.addEventListener('click', () => {
+      const open = links.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open);
+      const spans = toggle.querySelectorAll('span');
+      if (open) {
+        spans[0].style.cssText = 'transform: translateY(6.5px) rotate(45deg)';
+        spans[1].style.cssText = 'opacity: 0; transform: scaleX(0)';
+        spans[2].style.cssText = 'transform: translateY(-6.5px) rotate(-45deg)';
+      } else {
+        spans.forEach(s => s.style.cssText = '');
+      }
+    });
+    links.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        links.classList.remove('open');
+        toggle.querySelectorAll('span').forEach(s => s.style.cssText = '');
+      });
+    });
+
+    // ─── Scroll reveal ───
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.09 });
+    reveals.forEach(el => observer.observe(el));
+
+    // ─── Gallery scroll position counter ───
+    [
+      { trackId: 'travels-gallery',  countId: 'travels-count',  unit: 'photos'   },
+      { trackId: 'gaming-gallery',   countId: 'gaming-count',   unit: 'captures' }
+    ].forEach(({ trackId, countId, unit }) => {
+      const track = document.getElementById(trackId);
+      const counter = document.getElementById(countId);
+      if (!track || !counter) return;
+      const total = track.children.length;
+
+      track.addEventListener('scroll', () => {
+        const maxScroll = track.scrollWidth - track.clientWidth;
+        if (maxScroll <= 0) return;
+        const pct = track.scrollLeft / maxScroll;
+        const current = Math.min(total, Math.round(pct * (total - 1)) + 1);
+        counter.textContent = `${current} / ${total} ${unit} · scroll to explore →`;
+      }, { passive: true });
+    });
+  </script>
+
+</body>
+</html>
